@@ -11,14 +11,10 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(
-  async (id, done) => {
-    try {
-      const user = await User.findById(id);
+  (id, done) => {
+    User.findById(id).then(user => {
       done(null, user);
-    }
-    catch (e) {
-      console.log('Unable to deserialize user: ', id)
-    }
+    });
   }
 );
 
@@ -36,10 +32,11 @@ passport.use(
 
         if (existingUser) {
           return done(null, existingUser);
-        } else {
-          const user = await new User({ googleId: profile.id }).save();
-          done(null, user);
         }
+
+        const user = await new User({ googleId: profile.id }).save();
+        done(null, user);
+
       } catch(e) {
         console.log('Failed to authenticate: ', e);
       }
